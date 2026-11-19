@@ -1,0 +1,12 @@
+admin123
+alice123
+123456
+password
+admin
+bob123
+user
+letmein
+qwerty
+admin123!
+
+alice123!
