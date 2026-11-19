@@ -351,3 +351,5 @@ They are recreated automatically the next time each mode starts.
 | Wireshark shows no loopback traffic (Windows) | Install Npcap with loopback support and capture on the Npcap Loopback Adapter. |
 | `iptables: Permission denied` | Run with `sudo` on Linux. iptables does not exist on Windows. |
 | Brute-force loop reports a false positive | Match on `Welcome back, bob` — the login page subtitle also contains "Welcome back". |
+| SQL injection payload is rejected | Make sure you are on **:5000** (vulnerable), not :5001. Curly quotes and long dashes from slides are normalized automatically, so copied payloads also work. |
+| A restart/change seems ignored | Several app copies may be running. Stop them all, then start fresh: `Get-CimInstance Win32_Process -Filter "Name='python.exe'" \| Where-Object { $_.CommandLine -match 'security-demo-app' } \| ForEach-Object { Stop-Process -Id $_.ProcessId -Force }` |

@@ -1,0 +1,4 @@
+{"ts":"2026-11-19T19:20:09.851Z","cmd":"goto","args":"http://127.0.0.1:5000/login","origin":"http://127.0.0.1:5000/login","durationMs":239,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-11-19T19:20:10.742Z","cmd":"screenshot","args":"C:\\Users\\rober\\Desktop\\security-test\\shot-2-vulnerable-login.png","origin":"http://127.0.0.1:5000/login","durationMs":389,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-11-19T19:20:10.999Z","cmd":"goto","args":"http://127.0.0.1:5000/","origin":"http://127.0.0.1:5000/","durationMs":64,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-11-19T19:20:11.421Z","cmd":"screenshot","args":"C:\\Users\\rober\\Desktop\\security-test\\shot-1-storefront.png","origin":"http://127.0.0.1:5000/","durationMs":242,"status":"ok","hasCookies":false,"mode":"launched"}

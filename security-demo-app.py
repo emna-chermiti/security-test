@@ -69,6 +69,24 @@ DEMO_ACCOUNTS = [
     ("bob", "123456", "Customer · weak password"),
 ]
 
+# Word, PowerPoint and some phone keyboards silently replace straight quotes
+# and dashes with typographic look-alikes (' -> ’, -- -> —). When the demo
+# payload is copied from a slide, those characters stop it from being SQL.
+# We normalize them back to ASCII in VULNERABLE mode only, so the classroom
+# demo works. This does NOT make the app safe: the input is still pasted
+# straight into the SQL string below.
+TYPOGRAPHIC_FIXES = str.maketrans({
+    "\u2018": "'", "\u2019": "'", "\u201a": "'", "\u201b": "'",  # curly single quotes
+    "\u201c": '"', "\u201d": '"',                                  # curly double quotes
+    "\u00b4": "'", "\u0060": "'", "\u2032": "'",                  # acute, backtick, prime
+    "\u2013": "-", "\u2014": "-", "\u2015": "-", "\u2212": "-",   # en/em dash, minus sign
+})
+
+
+def normalize_demo_input(value: str) -> str:
+    """Turn typographic quotes/dashes into ASCII (vulnerable demo only)."""
+    return value.translate(TYPOGRAPHIC_FIXES)
+
 
 def get_db() -> sqlite3.Connection:
     """One SQLite connection per request."""
@@ -288,7 +306,6 @@ BASE = """<!DOCTYPE html>
     <nav>
       <a href="/">Store</a>
       <a href="/dashboard">Dashboard</a>
-      <a href="/admin">Admin</a>
       {% if user %}
         <span class="who">👤 {{ user }}</span>
         <a class="nav-cta" href="/logout">Logout</a>
@@ -397,6 +414,10 @@ def login():
                 return redirect("/dashboard")
         else:
             # VULNERABLE: raw string concatenation -> SQL injection
+            # Normalize typographic quotes/dashes so payloads pasted from
+            # slides still work. The input is still NOT escaped or sanitized.
+            username = normalize_demo_input(username)
+            password = normalize_demo_input(password)
             query = (
                 f"SELECT username, password, is_admin FROM users "
                 f"WHERE username = '{username}' AND password = '{password}'"
@@ -418,28 +439,7 @@ def login():
 
 
 def login_page(error=None):
-    creds_rows = "".join(
-        f"<tr><td><code>{u}</code></td><td><code>{p}</code></td><td>{r}</td></tr>"
-        for u, p, r in DEMO_ACCOUNTS
-    )
     error_html = f'<div class="alert danger">⚠️ {html.escape(error)}</div>' if error else ""
-
-    if SECURE:
-        mode_hint = """
-        <div class="hint ok">
-          <strong>🔒 Secure mode</strong>
-          <p>Parameterized SQL query · PBKDF2-hashed passwords. The vulnerable
-          demo's injection payload is treated as plain text here — try it and
-          the login simply fails.</p>
-        </div>"""
-    else:
-        mode_hint = """
-        <div class="hint danger">
-          <strong>⚠️ Vulnerable mode</strong>
-          <p>SQL is built by string concatenation. Type this into the
-          <em>username</em> field (any password):</p>
-          <code class="payload">admin' OR '1'='1' --</code>
-        </div>"""
 
     return f"""
     <div class="auth-wrap">
@@ -459,15 +459,6 @@ def login_page(error=None):
           </label>
           <button class="btn primary" type="submit">Sign in</button>
         </form>
-        <div class="divider"></div>
-        <div class="cred-box">
-          <h3>Demo accounts</h3>
-          <table>
-            <thead><tr><th>Username</th><th>Password</th><th>Role</th></tr></thead>
-            <tbody>{creds_rows}</tbody>
-          </table>
-        </div>
-        {mode_hint}
       </div>
     </div>
     """
